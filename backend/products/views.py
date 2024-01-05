@@ -1,6 +1,7 @@
 from rest_framework import generics, mixins, permissions, authentication
 from .models import Product
 from .serializers import ProductSerializers
+from .permissions import IsStaffEditor
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -46,6 +47,8 @@ class ProductCreateView(generics.CreateAPIView):
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
+    authentication_classes = [authentication.SessionAuthentication, authentication.TokenAuthentication]
+    permission_classes = [IsStaffEditor]
 
     def perform_create(self, serializer):
         title = serializer.validated_data.get('title')
@@ -68,7 +71,7 @@ class ProductMixinView(
     serializer_class = ProductSerializers
     lookup_field = 'pk'
     authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,permissions.DjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
