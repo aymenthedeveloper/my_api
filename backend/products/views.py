@@ -47,16 +47,13 @@ class ProductCreateView(generics.CreateAPIView):
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
-    authentication_classes = [authentication.SessionAuthentication, authentication.TokenAuthentication]
-    permission_classes = [IsStaffEditor]
 
     def perform_create(self, serializer):
         title = serializer.validated_data.get('title')
-        content = serializer.validated_data.get('content')
-        print(serializer.validated_data)
-        if content is not None:
-            content = title
-        serializer.save(content=content)
+        c = serializer.validated_data.get('content')
+        if c:
+            return serializer.save()
+        return serializer.save(content=title)
 
 
 class ProductMixinView(
@@ -70,8 +67,7 @@ class ProductMixinView(
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     lookup_field = 'pk'
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
